@@ -16,7 +16,12 @@ if ! exists('g:jekyll_post_dirs')
   let g:jekyll_post_dirs = ['_posts', '_source/_posts']
 endif
 
-" Extension used when creating new posts
+" Directories to search for drafts. _source/_drafts is for Octopress.
+if ! exists('g:jekyll_draft_dirs')
+  let g:jekyll_draft_dirs = ['_drafts', '_source/_drafts']
+endif
+
+" Extension used when creating new posts/drafts
 if ! exists('g:jekyll_post_extension')
   let g:jekyll_post_extension = '.markdown'
 endif
