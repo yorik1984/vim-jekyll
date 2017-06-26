@@ -298,6 +298,23 @@ function! s:edit_draft(cmd, draft)
   endif
 endfunction
 
+" Publish a draft
+function! s:publish_draft(draft)
+  let draft_filename = b:jekyll_draft_dir.'/'.a:draft.g:jekyll_post_extension
+
+  if filereadable(draft_filename)
+    let post_filename = s:post_filename(a:draft)
+    " Check if exists a post with same filename, first
+    let success = rename(draft_filename, post_filename)
+    if success != 0
+      return s:error('Could not rename the file '.file.'! Try :JPublishDraft! to replace the post.')
+    endif
+    echo 'Draft published on '.post_filename
+  else
+    return s:error('File '.file.' does not exist! Try :Jdraft! to create a new draft.')
+  endif
+endfunction
+
 " }}}
 
 " Initialization {{{
