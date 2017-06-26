@@ -26,12 +26,12 @@ if ! exists('g:jekyll_post_extension')
   let g:jekyll_post_extension = '.markdown'
 endif
 
-" Filetype applied to new posts
+" Filetype applied to new posts/drafts
 if ! exists('g:jekyll_post_filetype')
   let g:jekyll_post_filetype = 'liquid'
 endif
 
-" Template for new posts
+" Template for new posts/drafts
 if ! exists('g:jekyll_post_template')
   let g:jekyll_post_template = [
     \ '---',
