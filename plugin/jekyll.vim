@@ -363,6 +363,23 @@ function! s:find_jekyll(path) abort
   return ['', '']
 endfunction
 
+" Try to locate the _drafts directory
+function! s:find_jekyll_drafs(path) abort
+  let cur_path = a:path
+  let old_path = ""
+  while old_path != cur_path
+    for dir in g:jekyll_draft_dirs
+      let dir = s:escape_path(dir)
+      if isdirectory(cur_path.'/'.dir)
+        return cur_path.'/'.dir
+      endif
+    endfor
+    let old_path = cur_path
+    let cur_path = fnamemodify(old_path, ':h')
+  endwhile
+  return ''
+endfunction
+
 " Initialize the plugin if we can detect a Jekyll blog
 function! s:init(path)
   let [root_dir, post_dir] = s:find_jekyll(a:path)
@@ -373,6 +390,7 @@ function! s:init(path)
 
   let b:jekyll_root_dir = root_dir
   let b:jekyll_post_dir = post_dir
+  let b:jekyll_draft_dir = s:find_jekyll_drafs(a:path)
 
   silent doautocmd User Jekyll
 endfunction
