@@ -271,6 +271,17 @@ function! s:create_draft(cmd, ...)
   endif
 endfunction
 
+" Edit a draft
+function! s:edit_draft(cmd, draft)
+  let file = b:jekyll_draft_dir.'/'.a:draft.g:jekyll_post_extension
+
+  if filereadable(file)
+    return s:load_post(a:cmd, file)
+  else
+    return s:error('File '.file.' does not exist! Try :J'.a:cmd.'draft! to create a new draft.')
+  endif
+endfunction
+
 " }}}
 
 " Initialization {{{
