@@ -247,6 +247,22 @@ endfunction
 function! s:draft_filename(title)
   return b:jekyll_draft_dir.'/'.s:dasherize(a:title).g:jekyll_post_extension
 endfunction
+
+" Used to autocomplete drafts
+function! s:draft_list(A, L, P)
+  let prefix   = b:jekyll_draft_dir.'/'
+  let data     = s:gsub(glob(prefix.'*.*')."\n", prefix, '')
+  let data     = s:gsub(data, '\'.g:jekyll_post_extension."\n", "\n")
+  let files    = reverse(split(data, "\n"))
+  " select the completion candidates using a substring match on the first argument
+  " instead of a prefix match (I consider this to be more user friendly)
+  let filtered = filter(copy(files), 'v:val =~ a:A')
+
+  if ! empty(filtered)
+    return filtered
+  endif
+endfunction
+
 " Create a new draft
 function! s:create_draft(cmd, ...)
   let title = a:0 && ! empty(a:1) ? a:1 : input('Draft title: ')
