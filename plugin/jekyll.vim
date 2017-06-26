@@ -241,6 +241,38 @@ endfunction
 
 " }}}
 
+" Drafts functions {{{
+
+" Returns the filename for a new draft based on it's title.
+function! s:draft_filename(title)
+  return b:jekyll_draft_dir.'/'.s:dasherize(a:title).g:jekyll_post_extension
+endfunction
+" Create a new draft
+function! s:create_draft(cmd, ...)
+  let title = a:0 && ! empty(a:1) ? a:1 : input('Draft title: ')
+
+  if empty(title)
+    return s:error('You must specify a title')
+  elseif filereadable(b:jekyll_draft_dir.'/'.title.g:jekyll_post_extension)
+    return s:error(title.' already exists!')
+  endif
+
+  call s:load_post(a:cmd, s:draft_filename(title))
+
+  let error = append(0, g:jekyll_post_template)
+
+  if error > 0
+    return s:error("Couldn't create draft.")
+  else
+    let &ft = g:jekyll_post_filetype
+
+    silent! %s/JEKYLL_TITLE/\=s:post_title(title)/g
+    silent! %s/JEKYLL_DATE/\=s:yaml_formatted_date()/g
+  endif
+endfunction
+
+" }}}
+
 " Initialization {{{
 
 " Register plugin commands
