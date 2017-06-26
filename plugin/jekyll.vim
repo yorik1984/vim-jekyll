@@ -298,6 +298,16 @@ function! s:edit_draft(cmd, draft)
   endif
 endfunction
 
+" Create/edit a draft, used by :Jdraft and friends to determine if we're editing
+" or creating a draft.
+function! s:open_draft(create, cmd, ...)
+  if a:create
+    return s:create_draft(a:cmd, a:1)
+  else
+    return s:edit_draft(a:cmd, a:1)
+  endif
+endfunction
+
 " Publish a draft
 function! s:publish_draft(draft)
   let draft_filename = b:jekyll_draft_dir.'/'.a:draft.g:jekyll_post_extension
@@ -328,10 +338,12 @@ endfunction
 function! s:register_commands()
   for cmd in ['', 'S', 'V', 'T']
     call s:define_command('-bang -nargs=? -complete=customlist,s:post_list J'.cmd.'post :call s:open_post(<bang>0, "'.cmd.'", <q-args>)')
+    call s:define_command('-bang -nargs=? -complete=customlist,s:draft_list J'.cmd.'draft :call s:open_draft(<bang>0, "'.cmd.'", <q-args>)')
   endfor
 
   call s:define_command('-nargs=* Jbuild call s:jekyll_build("<args>")')
   call s:define_command('-nargs=* Jserve call s:jekyll_serve("<args>")')
+  call s:define_command('-nargs=1 -complete=customlist,s:draft_list JPublishDraft :call s:publish_draft(<q-args>)')
 endfunction
 
 " Try to locate the _posts directory
