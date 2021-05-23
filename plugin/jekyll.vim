@@ -88,7 +88,7 @@ function! s:dasherize(string)
 endfunction
 
 function! s:yaml_formatted_date()
-  return strftime("%Y-%m-%d %H:%M:%S %z")
+  return strftime("%Y-%m-%d %H:%M:%S")
 endfunction
 
 " }}}
@@ -96,13 +96,27 @@ endfunction
 " Post functions {{{
 
 " Returns the filename for a new post based on it's title.
-function! s:post_filename(title)
-  return b:jekyll_post_dir.'/'.strftime('%Y-%m-%d-').s:dasherize(a:title).g:jekyll_post_extension
+function! s:post_filename(title, dir)
+  return b:jekyll_post_dir.'/'.a:dir.'/'.strftime('%Y-%m-%d-').s:dasherize(a:title).g:jekyll_post_extension
 endfunction
 "
 " Strips whitespace and escapes double quotes
 function! s:post_title(title)
   let title = s:gsub(a:title, '(^[ ]*|[ ]*$)', '')
+  let title = s:gsub(title, '[ ]{2,}', ' ')
+  let title = s:gsub(title, '"', '\\&')
+  return title
+endfunction
+
+function! s:post_categories(categories)
+  let title = s:gsub(a:categories, '(^[ ]*|[ ]*$)', '')
+  let title = s:gsub(title, '[ ]{2,}', ' ')
+  let title = s:gsub(title, '"', '\\&')
+  return title
+endfunction
+
+function! s:post_tags(tags)
+  let title = s:gsub(a:tags, '(^[ ]*|[ ]*$)', '')
   let title = s:gsub(title, '[ ]{2,}', ' ')
   let title = s:gsub(title, '"', '\\&')
   return title
@@ -123,6 +137,60 @@ function! s:post_list(A, L, P)
   endif
 endfunction
 
+
+function! s:post_categories_list()
+  let filename = b:jekyll_post_dir.'/'.'categories.txt'
+  let lines = readfile(filename)
+  let lines = uniq(sort(lines))
+  if ! empty(lines)
+    let oneLine = join(lines, ", ")
+    return oneLine
+  endif
+
+  return ""
+endfunction
+
+function! s:add_categories(categories)
+  let oldClass = s:post_categories_list()
+  let oldList = []
+  if oldClass != ""
+    let oldList = split(oldClass, ", ")
+  endif
+
+  let newList = add(oldList, a:categories)
+  let newList = uniq(sort(newList))
+
+  if !empty(newList)
+    let filename = b:jekyll_post_dir.'/'.'categories.txt'
+    call writefile(newList, filename)
+  endif
+endfunction
+
+" Used to autocomplete posts
+function! s:post_dir_list()
+  let prefix   = b:jekyll_post_dir.'/'
+  let dirs = split(glob(prefix.'*'), "\n")
+  let data = []
+  for f in dirs
+    if isdirectory(f)
+      let data = add(data, f)
+    endif
+  endfor
+
+  let dirStr = join(data, "\n")
+
+  let dirs  = s:gsub(dirStr."\n", prefix, '')
+  let dirs  = s:gsub(dirs, '\'.g:jekyll_post_extension."\n", "\n")
+
+  let dirs = reverse(split(dirs, "\n"))
+  " select the completion candidates using a substring match on the first argument
+  " instead of a prefix match (I consider this to be more user friendly)
+
+  if ! empty(dirs)
+    return "\n".join(dirs, ", ")."\n"
+  endif
+endfunction
+
 " Send the given filename to the editor using cmd
 function! s:load_post(cmd, filename)
   let cmd  = empty(a:cmd) ? 'E' : a:cmd
@@ -137,15 +205,37 @@ endfunction
 
 " Create a new blog post
 function! s:create_post(cmd, ...)
-  let title = a:0 && ! empty(a:1) ? a:1 : input('Post title: ')
-
-  if empty(title)
-    return s:error('You must specify a title')
-  elseif filereadable(b:jekyll_post_dir.'/'.title.g:jekyll_post_extension)
-    return s:error(title.' already exists!')
+  let fileName = a:0 && ! empty(a:1) ? a:1 : input('Post file name: ')
+  if empty(fileName)
+    return s:error('You must specify a file name')
   endif
 
-  call s:load_post(a:cmd, s:post_filename(title))
+  let title = a:0 && ! empty(a:1) ? a:1 : input('Post title: ')
+  if empty(title)
+    return s:error('You must specify a title')
+  endif
+
+  let tagCategories = "\n".s:post_categories_list()."\n"
+  let categories = a:0 && ! empty(a:1) ? a:1 : input('Post categoies(split by comma. you can select existed or new): who is existed as follow:'.tagCategories.'pleas input categories: ')
+  if empty(categories)
+    return s:error('You must specify a categoies')
+  endif
+  call s:add_categories(categories)
+
+  let tagTmps = s:post_dir_list()
+  let tags = a:0 && ! empty(a:1) ? a:1 : input('Post tags(split by comma. you can select existed or new. who is existed as follow:'.tagTmps.'please input tag: ')
+  let dirs = split(tags, ",")
+  let firstDir = dirs[0]
+  if empty(tags)
+    return s:error('You must specify a tags(same as the dir)')
+  endif
+
+  let mdFile = s:post_filename(fileName, firstDir)
+  if filereadable(mdFile)
+    return s:error(fileName.' already exists!')
+  endif
+
+  call s:load_post(a:cmd, mdFile)
 
   let error = append(0, g:jekyll_post_template)
 
@@ -154,9 +244,10 @@ function! s:create_post(cmd, ...)
   else
     let &ft = g:jekyll_post_filetype
 
-    let date = strftime('%a %b %d %T %z %Y')
     silent! %s/JEKYLL_TITLE/\=s:post_title(title)/g
     silent! %s/JEKYLL_DATE/\=s:yaml_formatted_date()/g
+    silent! %s/JEKYLL_CATEGORIES/\=s:post_categories(categories)/g
+    silent! %s/JEKYLL_TAGS/\=s:post_tags(tags)/g
   endif
 endfunction
 

@@ -38,13 +38,16 @@ The extension used when creating new posts.
 The |filetype| used when creating new posts.
 
                                                 *g:jekyll_post_template*  >
-    let g:jekyll_post_template =  [
-      \ '---',
-      \ 'layout: post',
-      \ 'title: "JEKYLL_TITLE"',
-      \ 'date: "JEKYLL_DATE"',
-      \ '---',
-      \ '']
+  let g:jekyll_post_template =  [
+        \ '---',
+        \ 'layout: post',
+        \ 'title: "JEKYLL_TITLE"',
+        \ 'date: "JEKYLL_DATE"',
+        \ 'categories: "JEKYLL_CATEGORIES"',
+        \ 'tags: "JEKYLL_TAGS"',
+        \ '---',
+        \ '']
+
 A |List| containing lines to used as a template when creating new posts.
 JEKYLL_DATE and JEKYLL_TITLE will be replaced with their real values.
 

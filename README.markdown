@@ -1,5 +1,11 @@
 # jekyll.vim
 
+The repo is fork from parkr/vim-jekyll with some extend.
+It can list and input your categories. It can list and input your tag.
+You can follow the list or add a new categorie or tag.
+You should write all your categories exited in categories.txt when you 
+first use the plugin. One line is one categorie only in categories.txt.
+
 Blogging from the command line should not be tedious.
 
 This script is intended to automate the process of creating and editing
@@ -50,6 +56,19 @@ See also `:help jekyll-commands`.
 ## Configuration
 
 See `:help jekyll-configuration`.
+
+Config this in your vim config file. eg:
+
+  let g:jekyll_post_template =  [
+        \ '---',
+        \ 'layout: post',
+        \ 'title: "JEKYLL_TITLE"',
+        \ 'date: "JEKYLL_DATE"',
+        \ 'categories: "JEKYLL_CATEGORIES"',
+        \ 'tags: "JEKYLL_TAGS"',
+        \ '---',
+        \ '']
+
 
 ## License
 
