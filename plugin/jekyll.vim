@@ -33,6 +33,8 @@ if ! exists('g:jekyll_post_template')
     \ 'layout: post',
     \ 'title: "JEKYLL_TITLE"',
     \ 'date: "JEKYLL_DATE"',
+    \ 'categoies: "JEKYLL_CATEGORIES"',
+    \ 'tags: "JEKYLL_TAGS"',
     \ '---',
     \ '']
 endif
