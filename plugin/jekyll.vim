@@ -127,7 +127,7 @@ endfunction
 " Used to autocomplete posts
 function! s:post_list(A, L, P)
   let prefix   = b:jekyll_post_dir.'/'
-  let data     = s:gsub(glob(prefix.'*.*')."\n", prefix, '')
+  let data     = s:gsub(glob(prefix.'*.*')."\n".glob(prefix.'*/*')."\n", prefix, '')
   let data     = s:gsub(data, '\'.g:jekyll_post_extension."\n", "\n")
   let files    = reverse(split(data, "\n"))
   " select the completion candidates using a substring match on the first argument
