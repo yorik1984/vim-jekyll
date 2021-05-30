@@ -6,6 +6,8 @@ You can follow the list or add a new categorie or tag.
 You should write all your categories exited in categories.txt when you 
 first use the plugin. One line is one categorie only in categories.txt.
 
+It can auto complete hte file and fold when you use the Jpost with TAB key.
+
 Blogging from the command line should not be tedious.
 
 This script is intended to automate the process of creating and editing
