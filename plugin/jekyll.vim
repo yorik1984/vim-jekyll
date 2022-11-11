@@ -23,7 +23,7 @@ endif
 
 " Extension used when creating new posts/drafts
 if ! exists('g:jekyll_post_extension')
-  let g:jekyll_post_extension = '.markdown'
+  let g:jekyll_post_extension = '.md'
 endif
 
 " Filetype applied to new posts/drafts
@@ -134,6 +134,7 @@ function! s:post_list(A, L, P)
   let prefix   = b:jekyll_post_dir.'/'
   let data     = s:gsub(glob(prefix.'*.*')."\n".glob(prefix.'*/*')."\n", prefix, '')
   let data     = s:gsub(data, '\'.g:jekyll_post_extension."\n", "\n")
+  let data     = s:gsub(data, '\d\d\d\d-\d\d-\d\d-', '')
   let files    = reverse(split(data, "\n"))
   " select the completion candidates using a substring match on the first argument
   " instead of a prefix match (I consider this to be more user friendly)
@@ -260,7 +261,14 @@ endfunction
 
 " Edit a post
 function! s:edit_post(cmd, post)
-  let file = b:jekyll_post_dir.'/'.a:post.g:jekyll_post_extension
+  let prefix   = b:jekyll_post_dir.'/'
+  let data     = s:gsub(glob(prefix.'*.*')."\n", prefix, '')
+  let data     = s:gsub(data, '\'.g:jekyll_post_extension."\n", "\n")
+  let files    = split(data, "\n")
+  let data     = s:gsub(data, '\d\d\d\d-\d\d-\d\d-', '')
+  let files_   = split(data, "\n")
+  let idx      = index(files_, a:post)
+  let file = b:jekyll_post_dir.'/'.files[idx].g:jekyll_post_extension
 
   if filereadable(file)
     return s:load_post(a:cmd, file)
@@ -434,6 +442,7 @@ function! s:register_commands()
     call s:define_command('-bang -nargs=? -complete=customlist,s:draft_list J'.cmd.'draft :call s:open_draft(<bang>0, "'.cmd.'", <q-args>)')
   endfor
 
+  call s:define_command('-bang -nargs=? -complete=customlist,s:post_list Ed :call s:open_post(<bang>0, "V", <q-args>)')
   call s:define_command('-nargs=* Jbuild call s:jekyll_build("<args>")')
   call s:define_command('-nargs=* Jserve call s:jekyll_serve("<args>")')
   call s:define_command('-nargs=1 -complete=customlist,s:draft_list JPublishDraft :call s:publish_draft(<q-args>)')
