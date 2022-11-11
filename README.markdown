@@ -18,10 +18,9 @@ This is a complete rewrite of
 [csexton/jekyll.vim](https://github.com/csexton/jekyll.vim/) with these
 improvements:
 
-* Commands are added as buffer commands when a Jekyll blog is found
-* Commands to edit/split/vsplit/tabnew a post
-* Tab completion for opening existing posts
-* Recognizes Octopress blogs and others with custom `_posts` directory
+* Commands to edit/split/vsplit/tabnew a post and draft.
+* Tab completion for opening existing posts and drafts.
+* Recognizes Octopress blogs and others with custom `_posts` and `_drafts` directory
 * Customizable template for new posts
 * Customizable build command, with automatic support for bundler
 
@@ -41,6 +40,15 @@ a blog.
     :JVpost[!] [{name}] Same as :Jpost, but opens post in a vertical split.
 
     :JTpost[!] [{name}] Same as :Jpost, but opens post in a tab.
+
+    :Jdraft[!]  [{name}] Create or edit the specified draft. With no argument,
+                        you will be prompted to select a draft or enter a title.
+
+    :JSdraft[!] [{name}] Same as :Jdraft, but opens draft in a horizontal split.
+
+    :JVdraft[!] [{name}] Same as :Jdraft, but opens draft in a vertical split.
+
+    :JTdraft[!] [{name}] Same as :Jdraft, but opens draft in a tab.
 
     :Jbuild    [{args}] Generate blog. This will check for the presence of a
                         Gemfile; if found `bundle exec` is used to run the

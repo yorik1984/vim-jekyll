@@ -11,9 +11,9 @@ Jekyll (http://jekyllrb.com/) blog posts from within vim.
 This is complete rewrite of csexton/jekyll.vim
 (https://github.com/csexton/jekyll.vim/) with these improvements:
 
-* Commands to edit/split/vsplit/tabnew a post
-* Tab completion for opening existing posts
-* Recognizes Octopress blogs and others with custom `_posts` directory
+* Commands to edit/split/vsplit/tabnew a post and draft.
+* Tab completion for opening existing posts and drafts.
+* Recognizes Octopress blogs and others with custom `_posts` and `_drafts` directory
 * Customizable template for new posts
 * Customizable build command, with automatic support for bundler
 
@@ -23,6 +23,11 @@ CONFIGURATION                                   *jekyll-configuration*
 There are a few global variables that can be set to adjust the way vim handles
 Jekyll blogs. Default values for each are listed below unless noted.
 
+                                                *g:jekyll_draft_dirs*  >
+    let g:jekyll_draft_dirs = ['_drafts', '_source/_drafts']
+A |List| containing paths to search to identify a Jekyll blog's draft
+directory. For most Jekyll blogs, this will be `_drafts`. Octopress posts are
+kept in `_source/_drafts`.
                                                 *g:jekyll_post_dirs*  >
     let g:jekyll_post_dirs = ['_posts', '_source/_posts']
 A |List| containing paths to search to identify a Jekyll blog's posts
@@ -81,6 +86,19 @@ blog.
 
                                                 *jekyll-:JTpost*
 :JTpost[!] [{name}] Same as |:Jpost|, but opens post in a tab.
+
+                                                *jekyll-:Jdraft*
+:Jpost[!]  [{name}] Create or edit the specified post. With no argument, you
+                    will be prompted to select a post or enter a title.
+
+                                                *jekyll-:JSdraft*
+:JSpost[!] [{name}] Same as |:Jdraft|, but opens post in a horizontal split.
+
+                                                *jekyll-:JVdraft*
+:JVpost[!] [{name}] Same as |:Jdraft|, but opens post in a vertical split.
+
+                                                *jekyll-:JTdraft*
+:JTpost[!] [{name}] Same as |:Jdraft|, but opens post in a tab.
 
                                                 *jekyll-:Jbuild*
 :Jbuild [{args}]    Generate blog. This will check for the presence of a

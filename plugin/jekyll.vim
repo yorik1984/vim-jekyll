@@ -16,17 +16,22 @@ if ! exists('g:jekyll_post_dirs')
   let g:jekyll_post_dirs = ['_posts', '_source/_posts']
 endif
 
-" Extension used when creating new posts
+" Directories to search for drafts. _source/_drafts is for Octopress.
+if ! exists('g:jekyll_draft_dirs')
+  let g:jekyll_draft_dirs = ['_drafts', '_source/_drafts']
+endif
+
+" Extension used when creating new posts/drafts
 if ! exists('g:jekyll_post_extension')
   let g:jekyll_post_extension = '.markdown'
 endif
 
-" Filetype applied to new posts
+" Filetype applied to new posts/drafts
 if ! exists('g:jekyll_post_filetype')
   let g:jekyll_post_filetype = 'liquid'
 endif
 
-" Template for new posts
+" Template for new posts/drafts
 if ! exists('g:jekyll_post_template')
   let g:jekyll_post_template = [
     \ '---',
@@ -329,6 +334,92 @@ endfunction
 
 " }}}
 
+" Drafts functions {{{
+
+" Returns the filename for a new draft based on it's title.
+function! s:draft_filename(title)
+  return b:jekyll_draft_dir.'/'.s:dasherize(a:title).g:jekyll_post_extension
+endfunction
+
+" Used to autocomplete drafts
+function! s:draft_list(A, L, P)
+  let prefix   = b:jekyll_draft_dir.'/'
+  let data     = s:gsub(glob(prefix.'*.*')."\n", prefix, '')
+  let data     = s:gsub(data, '\'.g:jekyll_post_extension."\n", "\n")
+  let files    = reverse(split(data, "\n"))
+  " select the completion candidates using a substring match on the first argument
+  " instead of a prefix match (I consider this to be more user friendly)
+  let filtered = filter(copy(files), 'v:val =~ a:A')
+
+  if ! empty(filtered)
+    return filtered
+  endif
+endfunction
+
+" Create a new draft
+function! s:create_draft(cmd, ...)
+  let title = a:0 && ! empty(a:1) ? a:1 : input('Draft title: ')
+
+  if empty(title)
+    return s:error('You must specify a title')
+  elseif filereadable(b:jekyll_draft_dir.'/'.title.g:jekyll_post_extension)
+    return s:error(title.' already exists!')
+  endif
+
+  call s:load_post(a:cmd, s:draft_filename(title))
+
+  let error = append(0, g:jekyll_post_template)
+
+  if error > 0
+    return s:error("Couldn't create draft.")
+  else
+    let &ft = g:jekyll_post_filetype
+
+    silent! %s/JEKYLL_TITLE/\=s:post_title(title)/g
+    silent! %s/JEKYLL_DATE/\=s:yaml_formatted_date()/g
+  endif
+endfunction
+
+" Edit a draft
+function! s:edit_draft(cmd, draft)
+  let file = b:jekyll_draft_dir.'/'.a:draft.g:jekyll_post_extension
+
+  if filereadable(file)
+    return s:load_post(a:cmd, file)
+  else
+    return s:error('File '.file.' does not exist! Try :J'.a:cmd.'draft! to create a new draft.')
+  endif
+endfunction
+
+" Create/edit a draft, used by :Jdraft and friends to determine if we're editing
+" or creating a draft.
+function! s:open_draft(create, cmd, ...)
+  if a:create
+    return s:create_draft(a:cmd, a:1)
+  else
+    return s:edit_draft(a:cmd, a:1)
+  endif
+endfunction
+
+" Publish a draft
+function! s:publish_draft(draft)
+  let draft_filename = b:jekyll_draft_dir.'/'.a:draft.g:jekyll_post_extension
+
+  if filereadable(draft_filename)
+    let post_filename = s:post_filename(a:draft)
+    " Check if exists a post with same filename, first
+    let success = rename(draft_filename, post_filename)
+    if success != 0
+      return s:error('Could not rename the file '.file.'! Try :JPublishDraft! to replace the post.')
+    endif
+    echo 'Draft published on '.post_filename
+  else
+    return s:error('File '.file.' does not exist! Try :Jdraft! to create a new draft.')
+  endif
+endfunction
+
+" }}}
+
 " Initialization {{{
 
 " Register plugin commands
@@ -340,10 +431,12 @@ endfunction
 function! s:register_commands()
   for cmd in ['', 'S', 'V', 'T']
     call s:define_command('-bang -nargs=? -complete=customlist,s:post_list J'.cmd.'post :call s:open_post(<bang>0, "'.cmd.'", <q-args>)')
+    call s:define_command('-bang -nargs=? -complete=customlist,s:draft_list J'.cmd.'draft :call s:open_draft(<bang>0, "'.cmd.'", <q-args>)')
   endfor
 
   call s:define_command('-nargs=* Jbuild call s:jekyll_build("<args>")')
   call s:define_command('-nargs=* Jserve call s:jekyll_serve("<args>")')
+  call s:define_command('-nargs=1 -complete=customlist,s:draft_list JPublishDraft :call s:publish_draft(<q-args>)')
 endfunction
 
 " Try to locate the _posts directory
@@ -363,6 +456,23 @@ function! s:find_jekyll(path) abort
   return ['', '']
 endfunction
 
+" Try to locate the _drafts directory
+function! s:find_jekyll_drafs(path) abort
+  let cur_path = a:path
+  let old_path = ""
+  while old_path != cur_path
+    for dir in g:jekyll_draft_dirs
+      let dir = s:escape_path(dir)
+      if isdirectory(cur_path.'/'.dir)
+        return cur_path.'/'.dir
+      endif
+    endfor
+    let old_path = cur_path
+    let cur_path = fnamemodify(old_path, ':h')
+  endwhile
+  return ''
+endfunction
+
 " Initialize the plugin if we can detect a Jekyll blog
 function! s:init(path)
   let [root_dir, post_dir] = s:find_jekyll(a:path)
@@ -373,6 +483,7 @@ function! s:init(path)
 
   let b:jekyll_root_dir = root_dir
   let b:jekyll_post_dir = post_dir
+  let b:jekyll_draft_dir = s:find_jekyll_drafs(a:path)
 
   silent doautocmd User Jekyll
 endfunction
