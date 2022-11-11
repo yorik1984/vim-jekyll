@@ -43,7 +43,7 @@ a blog.
 | `:JVdraft[!] [{name}]` | Same as `:Jdraft`, but opens draft in a vertical split.
 | `:JTdraft[!] [{name}]` | Same as `:Jdraft`, but opens draft in a tab. |
 | `:Jbuild [{args}]` | Generate blog. This will check for the presence of a Gemfile; if found `bundle exec` is used to run the `jekyll` command. The blog will be built with: `jekyll --no-auto --no-server BLOG_ROOT BLOG_ROOT/SITE_DIR <args>`. If this doesn't fit your situation, you can set a custom command with `g:jekyll_build_command`. When using a custom command no check for a Gemfile is performed. |
-| `:Jserve [{args}]`| Serve blog. This will check for the presence of a Gemfile; if found `bundle exec` is used to run the `jekyll` command. The blog will be served with: `jekyll serve -s BLOG_ROOT -d BLOG_ROOT/SITE_DIR <args>`. If this doesn't fit your situation, you can set a custom command with `|g:jekyll_serve_command|`. When using a custom command no check for a Gemfile is performed. The server is run inline. Use Ctrl-C to exit and resume editing.
+| `:Jserve [{args}]`| Serve blog. This will check for the presence of a Gemfile. If found `bundle exec` is used to run the `jekyll` command. The blog will be served with: `jekyll serve -s BLOG_ROOT -d BLOG_ROOT/SITE_DIR <args>`. If this doesn't fit your situation, you can set a custom command with `|g:jekyll_serve_command|`. When using a custom command no check for a Gemfile is performed. The server is run inline. Use Ctrl-C to exit and resume editing.
 
 See also `:help jekyll-commands`.
 
